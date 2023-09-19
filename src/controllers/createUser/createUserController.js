@@ -6,23 +6,15 @@ export class CreateUserController {
   async handle(request, response) {
     const { name, lastName, email, password } = request.body;
 
-    if (!(name, lastName, email, password)) {
-      response.statusCode = 400;
-      response.write(JSON.stringify({ error: "any required user fields are not provided" }));
-      return response.end();
-    }
+    if (!(name, lastName, email, password))
+      return response.status(400).json({ error: "any required user fields are not provided" });
 
     try {
       const user = await this._createUserUseCase.execute({ name, lastName, email, password });
 
-      response.statusCode = 201;
-      response.write(JSON.stringify(user.toJSON()));
-
-      return response.end();
+      return response.status(201).json({ user });
     } catch (err) {
-      response.statusCode = 500;
-      response.write(JSON.stringify({ error: err.message }));
-      return response.end();
+      return response.status(500).json({ error: err.message });
     }
   }
 }

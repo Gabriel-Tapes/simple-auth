@@ -9,19 +9,16 @@ export class LoginController {
     try {
       const token = await this._loginUseCase.execute({ email, password });
 
-      response.statusCode = 201;
-      response.write(JSON.stringify({ token }));
+      return response.status(201).json({ token });
     } catch (err) {
-      response.statusCode = 500;
+      let statusCode = 500;
 
       if (err.message === "user not found")
-        response.statusCode = 404;
+        statusCode = 404;
       else if (err.message === "non-matching password")
-        response.statusCode = 400;
+        statusCode = 400;
 
-      response.write(JSON.stringify({ error: err.message }));
-    } finally {
-      return response.end();
+      return response.status(statusCode).json({ error: err.message });
     }
   }
 }

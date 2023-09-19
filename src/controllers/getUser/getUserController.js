@@ -4,24 +4,19 @@ export class GetUserController {
   }
 
   async handle(request, response) {
-    const session = JSON.parse(request.headers["session"]);
+    const session = JSON.parse(request.header("session"));
 
-    if (!session) {
-      response.statusCode = 403;
-      response.write(JSON.stringify({ error: "user is not authenticated" }));
-      return response.end();
+    if (!session)
+      return response.status(403).json({ error: "user is not authenticated" });
+
+    try {
+      const user = await this._getUserUseCase.execute(session.userId);
+      if (!user)
+        return response.status(404).json({ error: "user not found" });
+
+      return response.status(200).json({ user });
+    } catch (err) {
+      return response.status(500).json({ error: err.message });
     }
-
-    const user = await this._getUserUseCase.execute(session.userId);
-
-    if (!user) {
-      response.statusCode = 404;
-      response.write(JSON.stringify({ error: "user not found" }));
-      return response.end();
-    }
-
-    response.statusCode = 200;
-    response.write(JSON.stringify({ user: user.toJSON() }));
-    return response.end();
   }
 }
