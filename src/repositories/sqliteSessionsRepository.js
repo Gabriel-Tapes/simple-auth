@@ -1,4 +1,5 @@
 import { query } from "../infra/database/index.js";
+import { Session } from "../models/session.js";
 
 export class SqliteSessionsRepository {
   async createSession(session) {
@@ -16,6 +17,11 @@ export class SqliteSessionsRepository {
       [id]
     );
 
-    return { results, error };
+    if (error) throw error;
+    if (results.length === 0) return null;
+
+    const { user_id: userId, created_at: createdAt, expires_at: expiresAt } = results[0]
+
+    return new Session({ id, userId, createdAt, expiresAt })
   }
 }
